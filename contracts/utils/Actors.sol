@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "./Addresses.sol";
+import "./Address.sol";
 
 library Actors {
 

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-library Addresses {
+library Address {
 
     // Builtin Actor addresses
     address constant SYSTEM_ACTOR = 0xfF00000000000000000000000000000000000000;
