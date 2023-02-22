@@ -1,0 +1,24 @@
+{
+  "name": "fevmate",
+  "version": "0.0.0",
+  "description": "Building blocks for smart contract development on the Filecoin EVM",
+  "files": [
+    "contracts/**/*.sol"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wadeAlexC/fevmate.git"
+  },
+  "author": "Alex Wade <https://twitter.com/wadeAlexC>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/wadeAlexC/fevmate/issues"
+  },
+  "homepage": "https://github.com/wadeAlexC/fevmate#readme",
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.8.1"
+  }
+}

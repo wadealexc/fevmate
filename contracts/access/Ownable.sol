@@ -5,13 +5,12 @@ import "../utils/Address.sol";
 
 /**
  * @notice Two-step owner transferrance mixin. Unlike many fevmate contracts,
- *         no methods here normalize address inputs - so it is possible to
- *         transfer ownership to an ID address. However, the acceptOwnership
- *         method enforces that the pending owner address can actually be the
- *         msg.sender.
+ * no methods here normalize address inputs - so it is possible to transfer
+ * ownership to an ID address. However, the acceptOwnership method enforces
+ * that the pending owner address can actually be the msg.sender.
  *
- *         This should mean it's possible for other Filecoin actor types to
- *         hold the owner role - like BLS/SECP account actors.
+ * This should mean it's possible for other Filecoin actor types to hold the
+ * owner role - like BLS/SECP account actors.
  */
 abstract contract Ownable {
     
@@ -53,13 +52,13 @@ abstract contract Ownable {
 
     /**
      * @notice Allows the current owner to revoke the owner role, locking
-     *         any onlyOwner functions.
+     * any onlyOwner functions.
      *
-     *         Note: this method requires that there is not currently a
-     *         pending owner. To revoke ownership while there is a pending
-     *         owner, the current owner must first set a new pending owner
-     *         to address(0). Alternatively, the pending owner can claim
-     *         ownership and then revoke it.
+     * Note: this method requires that there is not currently a pending
+     * owner. To revoke ownership while there is a pending owner, the
+     * current owner must first set a new pending owner to address(0).
+     * Alternatively, the pending owner can claim ownership and then
+     * revoke it.
      */
     function revokeOwnership() public virtual onlyOwner {
         require(pendingOwner == address(0), "must not have pending owner");
@@ -70,11 +69,11 @@ abstract contract Ownable {
 
     /**
      * @notice Works like most 2-step ownership transfer methods. The current
-     *         owner can call this to set a new pending owner.
+     * owner can call this to set a new pending owner.
      * 
-     *         Note: the new owner address is NOT normalized - it is stored as-is.
-     *         This is safe, because the acceptOwnership method enforces that the
-     *         new owner can make a transaction as msg.sender.
+     * Note: the new owner address is NOT normalized - it is stored as-is.
+     * This is safe, because the acceptOwnership method enforces that the
+     * new owner can make a transaction as msg.sender.
      */
     function transferOwnership(address _newOwner) public virtual onlyOwner {
         pendingOwner = _newOwner;
@@ -85,9 +84,9 @@ abstract contract Ownable {
     /**
      * @notice Used by the pending owner to accept the ownership transfer.
      *
-     *         Note: If this fails unexpectedly, check that the pendingOwner
-     *         is not an ID address. The pending owner address should match
-     *         the pending owner's msg.sender address.         
+     * Note: If this fails unexpectedly, check that the pendingOwner is not
+     * an ID address. The pending owner address should match the pending
+     * owner's msg.sender address.         
      */
     function acceptOwnership() public virtual {
         require(msg.sender == pendingOwner, "unauthorized");

@@ -5,14 +5,14 @@ import "../utils/Address.sol";
 
 /**
  * @notice ERC20 mixin for the FEVM. This contract implements the ERC20
- *         standard, with additional safety features for the FEVM.
+ * standard, with additional safety features for the FEVM.
  *
- *         All methods attempt to normalize address input. That is, if
- *         they are provided ID addresses as input, they will attempt
- *         to convert these addresses to standard Eth addresses. 
+ * All methods attempt to normalize address input. This means that if
+ * they are provided ID addresses as input, they will attempt to convert
+ * these addresses to standard Eth addresses. 
  * 
- *         This is an important consideration when developing on the FEVM,
- *         and you can read about it more in [TODO].
+ * This is an important consideration when developing on the FEVM, and
+ * you can read about it more in [TODO].
  */
 abstract contract ERC20 {
 
