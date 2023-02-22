@@ -4,6 +4,17 @@ pragma solidity ^0.8.17;
 import "../../utils/Address.sol";
 import "./IERC721TokenReceiver.sol";
 
+/**
+ * @notice ERC721 mixin for the FEVM. This contract implements the ERC721
+ *         standard, with additional safety features for the FEVM.
+ *
+ *         All methods attempt to normalize address input. That is, if
+ *         they are provided ID addresses as input, they will attempt
+ *         to convert these addresses to standard Eth addresses. 
+ * 
+ *         This is an important consideration when developing on the FEVM,
+ *         and you can read about it more in [TODO].
+ */
 abstract contract ERC721 {
     
     using Address for *;
@@ -37,6 +48,10 @@ abstract contract ERC721 {
     event Approval(address indexed owner, address indexed spender, uint indexed tokenId);
     event ApprovalForAll(address indexed owner, address indexed spender, bool isApproved);
 
+    /*//////////////////////////////////////
+                  CONSTRUCTOR
+    //////////////////////////////////////*/
+
     constructor(
         string memory _name,
         string memory _symbol
@@ -67,7 +82,6 @@ abstract contract ERC721 {
         }
 
         tokenOwners[_tokenId] = _to;
-
         delete tokenApprovals[_tokenId];
 
         emit Transfer(_owner, _to, _tokenId);

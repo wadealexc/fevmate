@@ -3,6 +3,17 @@ pragma solidity ^0.8.17;
 
 import "../utils/Address.sol";
 
+/**
+ * @notice ERC20 mixin for the FEVM. This contract implements the ERC20
+ *         standard, with additional safety features for the FEVM.
+ *
+ *         All methods attempt to normalize address input. That is, if
+ *         they are provided ID addresses as input, they will attempt
+ *         to convert these addresses to standard Eth addresses. 
+ * 
+ *         This is an important consideration when developing on the FEVM,
+ *         and you can read about it more in [TODO].
+ */
 abstract contract ERC20 {
 
     using Address for *;
@@ -30,6 +41,10 @@ abstract contract ERC20 {
 
     event Transfer(address indexed from, address indexed to, uint256 amount);
     event Approval(address indexed owner, address indexed spender, uint256 amount);
+
+    /*//////////////////////////////////////
+                  CONSTRUCTOR
+    //////////////////////////////////////*/
 
     constructor (
         string memory _name, 
