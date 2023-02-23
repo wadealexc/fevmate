@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "../../utils/Address.sol";
+import "../../utils/FilAddress.sol";
 import "./IERC721TokenReceiver.sol";
 
 /**
@@ -17,7 +17,7 @@ import "./IERC721TokenReceiver.sol";
  */
 abstract contract ERC721 {
     
-    using Address for *;
+    using FilAddress for *;
 
     /*//////////////////////////////////////
                   TOKEN INFO

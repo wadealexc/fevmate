@@ -3,7 +3,7 @@ pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import "@openzeppelin/contracts/utils/StorageSlot.sol";
-import "../utils/Address.sol";
+import "../utils/FilAddress.sol";
 
 /**
  * @notice ERC-1967 compliant proxy based on OpenZeppelin's TransparentUpgradeableProxy.
@@ -18,7 +18,7 @@ import "../utils/Address.sol";
  */
 contract ClaimableProxy is ERC1967Proxy {
 
-    using Address for *;
+    using FilAddress for *;
 
     /*//////////////////////////////////////
                     STORAGE
@@ -136,7 +136,6 @@ contract ClaimableProxy is ERC1967Proxy {
     /*//////////////////////////////////////
                  ADMIN GETTERS
     //////////////////////////////////////*/
-
 
     /**
      * @notice Returns the proxy's admin address

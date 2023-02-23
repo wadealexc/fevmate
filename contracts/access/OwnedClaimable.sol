@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "../utils/Address.sol";
+import "../utils/FilAddress.sol";
 
 /**
  * @notice Two-step owner transferrance mixin. Unlike many fevmate contracts,
@@ -12,9 +12,9 @@ import "../utils/Address.sol";
  * This should mean it's possible for other Filecoin actor types to hold the
  * owner role - like BLS/SECP account actors.
  */
-abstract contract Ownable {
+abstract contract OwnedClaimable {
     
-    using Address for *;
+    using FilAddress for *;
 
     /*//////////////////////////////////////
                   OWNER INFO

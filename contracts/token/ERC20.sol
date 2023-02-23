@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "../utils/Address.sol";
+import "../utils/FilAddress.sol";
 
 /**
  * @notice ERC20 mixin for the FEVM. This contract implements the ERC20
@@ -16,7 +16,7 @@ import "../utils/Address.sol";
  */
 abstract contract ERC20 {
 
-    using Address for *;
+    using FilAddress for *;
 
     /*//////////////////////////////////////
                   TOKEN INFO

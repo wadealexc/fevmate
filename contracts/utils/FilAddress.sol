@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-library Address {
+library FilAddress {
 
     // Builtin Actor addresses
     address constant SYSTEM_ACTOR = 0xfF00000000000000000000000000000000000000;
@@ -24,7 +24,9 @@ library Address {
     address constant CALL_ACTOR_BY_ID = 0xfe00000000000000000000000000000000000005;
 
     // bytes20 constant NULL = 0x0000000000000000000000000000000000000000;
-    // bytes22 constant F4_ADDR_EXAMPLE = 0x040Aff00000000000000000000000000000000000001;    
+    // bytes22 constant F4_ADDR_EXAMPLE = 0x040Aff00000000000000000000000000000000000001;  
+
+    address internal constant ZERO_ID_ADDRESS = 0xfF00000000000000000000000000000000000000;
 
     /**
      * Attempt to convert address _a from an ID address to an Eth address
@@ -78,16 +80,14 @@ library Address {
      */
     function isIDAddress(address _a) internal pure returns (bool isID, uint64 id) {
         uint64 ID_MASK = type(uint64).max;
-        assembly ("memory-safe") {
+        /// @solidity memory-safe-assembly
+        assembly {
             // Get the last 8 bytes of _a - this is the id
             let temp := and(_a, ID_MASK)
 
-            // Zero out the last 8 bytes of _a and compare to the system actor
-            //
-            // The system actor is an ID address where id == 0, so if _a is an
-            // ID address, these will be equal.
+            // Zero out the last 8 bytes of _a and compare to the zero id address
             let a_mask := and(_a, not(temp))
-            if eq(a_mask, SYSTEM_ACTOR) {
+            if eq(a_mask, ZERO_ID_ADDRESS) {
                 isID := true
                 id := temp
             }
@@ -114,18 +114,36 @@ library Address {
      * isIDAddress above for definition.
      */
     function toIDAddress(uint64 _id) internal pure returns (address addr) {
-        assembly ("memory-safe") { addr := or(SYSTEM_ACTOR, _id) }
+        /// @solidity memory-safe-assembly
+        assembly { addr := or(SYSTEM_ACTOR, _id) }
     }
 
     /**
-     * Given an Actor ID, queries the LOOKUP_DELEGATED_ADDRESS precompile to
-     * to try to convert it to an Eth address. 
+     * @notice Query the lookup_delegated_address precompile to convert an actor id
+     * to an Eth address.
+     * 
+     * --- About ---
+     * 
+     * The lookup_delegated_address precompile retrieves the actor state corresponding
+     * to the id. If the actor has a delegated address, it is returned using fil
+     * address encoding (see below).
+     *
+     * f4, or delegated addresses, have a namespace as well as a subaddress that can
+     * be up to 54 bytes long. This is to support future address formats. Currently,
+     * though, the f4 format is only used to support Eth addresses.
+     *
+     * Consequently, the only addresses lookup_delegated_address should return have:
+     * - Prefix:     "f4" address      - 1 byte   - (0x04)
+     * - Namespace:  EAM actor id      - 1 byte   - (0x0A)
+     * - Subaddress: EVM-style address - 20 bytes - (EVM address)
+     * 
      * 
      * If _id cannot be converted to an Eth address, this returns (false, 0x00)
      */
     function getEthAddress(uint64 _id) internal view returns (bool success, address eth) {
         uint160 mask = type(uint160).max;
-        assembly ("memory-safe") {
+        /// @solidity memory-safe-assembly
+        assembly {
             mstore(0, _id)
             // LOOKUP_DELEGATED_ADDRESS returns an f4-encoded address. For
             // Eth addresses, the format is a 20-byte address, prefixed with
@@ -164,7 +182,8 @@ library Address {
             return(success, id);
         }
 
-        assembly ("memory-safe") {
+        /// @solidity memory-safe-assembly
+        assembly {
             // Convert EVM address to f4-encoded format.
             // This means 22 bytes, with prefix 0x040A:
             // * 0x04 is the protocol - "f4" address
@@ -184,6 +203,7 @@ library Address {
     }
 
     function returnDataSize() private pure returns (uint size) {
-        assembly ("memory-safe") { size := returndatasize() }
+        /// @solidity memory-safe-assembly
+        assembly { size := returndatasize() }
     }
 }

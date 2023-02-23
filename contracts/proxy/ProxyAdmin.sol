@@ -2,7 +2,7 @@
 pragma solidity ^0.8.17;
 
 import "./ClaimableProxy.sol";
-import "../access/Ownable.sol";
+import "../access/OwnedClaimable.sol";
 
 /**
  * @notice Auxiliary contract meant to be assigned as admin of a ClaimableProxy.
@@ -13,7 +13,7 @@ import "../access/Ownable.sol";
  * See https://docs.openzeppelin.com/contracts/4.x/api/proxy#TransparentUpgradeableProxy
  * for details on the TransparentUpgradableProxy and ProxyAdmin pattern.
  */
-contract ProxyAdmin is Ownable {
+contract ProxyAdmin is OwnedClaimable {
 
     /**
      * @notice Returns the implementation address of the proxy
