@@ -2,9 +2,12 @@
 
 Libraries, mixins, and other Solidity building blocks for use on the Filecoin EVM.
 
-* `access/Ownable.sol`: Classic Ownable-style access control, implemented using a two-step role transferrance pattern as this should be safer and more likely future-proof in the FEVM.
+* `access/OwnedClaimable.sol`: Classic Ownable-style access control, implemented using a two-step role transferrance pattern as this should be safer and more likely future-proof in the FEVM.
 * `token/`: ERC20, ERC721, and Wrapped FIL contracts, implemented with address normalization for token recipients.
-* `utils/Address.sol`: Utilities for dealing with all things address. Handles ID addresses and Eth addresses, as well as conversions between the two.
+* `proxy/`: Proxy, ProxyAdmin, and Implementation mixins based on ERC1967 and OpenZeppelin's TransparentUpgradeableProxy pattern. These work similarly to their OZ counterparts, except that role transferrance is implemented using the two-step transfer pattern. Additionally, different upgrade validation procedures are used.
+* `utils/FilAddress.sol`: Utilities for dealing with all things address. Handles ID addresses and Eth addresses, as well as conversions between the two.
+* `utils/CallNative.sol`: Utilities for calling actors via the call_actor precompiles.
+* `utils/Signatures.sol`: TODO - signature authorization for multiple signature/account types.
 
 Use at your own risk!
 
@@ -16,7 +19,7 @@ Once created, EOAs and smart contracts have both a standard EVM-style address, a
 
 Actor ids are just uint64 values, which means they are small enough to fit within Solidity's 20 byte address type. To support interacting with non-EVM actors as if they were EVM-native, the FEVM supports a special format that allows an actor id to be represented using Solidity's address type. Here are two examples:
 
-```solidity=
+```solidity
 // A Solidity address that contains the id "5" looks like: 
 address a = address(0xff00000000000000000000000000000000000005);
 
@@ -34,7 +37,7 @@ On the other hand, EVM-native actors (EOAs and EVM smart contracts) have *both* 
 
 To illustrate why this is such a big deal, let's use a simple contract as an example:
 
-```solidity=
+```solidity
 pragma solidity ^0.8.17;
 
 contract Bank {
