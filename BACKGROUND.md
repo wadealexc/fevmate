@@ -29,16 +29,6 @@ Additional quirks of FEVM gas:
 * The `INVALID` opcode does NOT consume all available gas as it does in Ethereum. In the FEVM, it behaves identically to `REVERT`, except that it cannot return data.
 * When calling precompiles, the passed in gas value is ignored. Execution will not consume more gas than you have available, but it is NOT possible to restrict the gas consumed by a precompile.
 
----
-
-*When porting smart contracts to the FEVM, make sure that:*
-
-* The code does NOT hardcode gas values anywhere.
-* The code does NOT use Solidity's `address.send` or `address.transfer`
-* The code does NOT rely on the `INVALID` opcode or precompile gas restriction described above
-
-In all cases, you should forward ALL gas to the callee. If you need reentrancy protection, use a `ReentrancyGuard` like the ones provided by [OpenZeppelin](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/security/ReentrancyGuard.sol) or [solmate](https://github.com/transmissions11/solmate/blob/main/src/utils/ReentrancyGuard.sol).
-
 ### 2. Addresses
 
 The FEVM does not exist in isolation. On Ethereum, smart contracts and EOAs only ever call (or are called by) other smart contracts and EOAs. In the FEVM, Eth contracts and accounts can interact with each other, but they can also interact with Filecoin-native actors.
