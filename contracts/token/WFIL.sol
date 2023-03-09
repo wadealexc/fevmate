@@ -2,11 +2,14 @@
 pragma solidity ^0.8.17;
 
 import "./ERC20.sol";
+import "../utils/FilAddress.sol";
 
 /**
  * @notice Wrapped Filecoin implementation, using ERC20-FEVM mixin.
  */
 contract WFIL is ERC20("Wrapped Filecoin", "WFIL", 18) {
+
+    using FilAddress for *;
 
     /*//////////////////////////////////////
                     EVENTS
