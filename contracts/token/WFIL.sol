@@ -33,7 +33,7 @@ contract WFIL is ERC20("Wrapped Filecoin", "WFIL", 18) {
 
         emit Withdrawal(msg.sender, _amount);
 
-        msg.sender.sendValue(amount);
+        payable(msg.sender).sendValue(_amount);
     }
 
     receive() external payable virtual {

@@ -78,9 +78,9 @@ abstract contract ERC20 {
 
         // Reduce allowance for spender. If allowance is set to the
         // max value, we leave it alone.
-        uint allowed = allowance[_owner][msg.sender];
+        uint allowed = allowances[_owner][msg.sender];
         if (allowed != type(uint).max)
-            allowance[_owner][msg.sender] = allowed - _amount;
+            allowances[_owner][msg.sender] = allowed - _amount;
         
         balances[_owner] -= _amount;
         balances[_to] += _amount;

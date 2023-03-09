@@ -77,8 +77,8 @@ abstract contract ERC721 {
         );
 
         unchecked {
-            balances[_owner]--;
-            balances[_to]++;
+            ownerBalances[_owner]--;
+            ownerBalances[_to]++;
         }
 
         tokenOwners[_tokenId] = _to;
@@ -189,7 +189,7 @@ abstract contract ERC721 {
         require(_to != address(0), "invalid recipient");
         require(tokenOwners[_tokenId] == address(0), "already minted");
 
-        balances[_to]++;
+        ownerBalances[_to]++;
         tokenOwners[_tokenId] = _to;
 
         emit Transfer(address(0), _to, _tokenId);
@@ -198,7 +198,7 @@ abstract contract ERC721 {
     function _burn(uint _tokenId) internal virtual {
         address owner = ownerOf(_tokenId);
 
-        balances[owner]--;
+        ownerBalances[owner]--;
         delete tokenOwners[_tokenId];
         delete tokenApprovals[_tokenId];
 
@@ -213,7 +213,7 @@ abstract contract ERC721 {
         // this to succeed.
         require(
             _to.code.length == 0 ||
-                IERC721TokenReceiver(_to).onERC721Received(msg.sender, _owner, _tokenId, "") ==
+                IERC721TokenReceiver(_to).onERC721Received(msg.sender, address(0), _tokenId, "") ==
                 IERC721TokenReceiver.onERC721Received.selector,
             "unsafe recipient"
         );
@@ -227,7 +227,7 @@ abstract contract ERC721 {
         // this to succeed.
         require(
             _to.code.length == 0 ||
-                IERC721TokenReceiver(_to).onERC721Received(msg.sender, _owner, _tokenId, _data) ==
+                IERC721TokenReceiver(_to).onERC721Received(msg.sender, address(0), _tokenId, _data) ==
                 IERC721TokenReceiver.onERC721Received.selector,
             "unsafe recipient"
         );
