@@ -31,7 +31,9 @@ library FilAddress {
     address constant MAX_ID_ADDRESS = 0xFf0000000000000000000000FFfFFFFfFfFffFfF;
 
     /**
-     * @notice Attempt to convert address _a from an ID address to an Eth address
+     * @notice ID -> Eth address
+     *
+     * Attempt to convert address _a from an ID address to an Eth address
      * If _a is NOT an ID address, this returns _a
      * If _a does NOT have a corresponding Eth address, this returns _a
      * 
@@ -56,7 +58,9 @@ library FilAddress {
     }
 
     /**
-     * @notice Attempt to convert address _a from an ID address to an Eth address
+     * @notice ID -> Eth address
+     *
+     * Attempt to convert address _a from an ID address to an Eth address
      * If _a is NOT an ID address, this returns _a unchanged
      * If _a does NOT have a corresponding Eth address, this method reverts
      *
@@ -174,8 +178,10 @@ library FilAddress {
     }
 
     /**
-     * @notice Given an Eth address, queries the RESOLVE_ADDRESS precompile to look
-     * up the corresponding ID address.
+     * @notice Eth address -> actor id
+     * 
+     * Given an Eth address, queries the RESOLVE_ADDRESS precompile to look
+     * up the corresponding actor id.
      * 
      * If there is no ID address, this returns (false, 0)
      * If the passed-in address is already an ID address, returns (true, id)
