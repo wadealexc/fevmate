@@ -28,7 +28,7 @@ Standard token contracts, implemented using address normalization for token tran
 
 ### Usage
 
-TODO usage/installation/run tests
+`npm i fevmate`
 
 ### Design Patterns
 
@@ -89,7 +89,7 @@ Here's the same minimalist ERC20 contract, this time using address normalization
 ```solidity
 pragma solidity ^0.8.17;
 
-import "@fevmate/utils/FilAddress.sol";
+import "fevmate/contracts/utils/FilAddress.sol";
 
 contract SmolERC20 {
 
