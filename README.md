@@ -70,9 +70,9 @@ Imagine a user with an Eth account is transferred tokens to their ID address. Th
 
 However, when the user calls transfer to move their tokens, they appear to have no balance! The contract uses `msg.sender` to look up their balance, which is NOT the ID address to which their tokens were transferred. The ID and Ethereum addresses may be equivalent in many places, but when an EVM-type actor calls an Eth contract, the `msg.sender` will always be their Ethereum address.
 
----
-
 One solution to this might be to reject token transfers to ID addresses. However, this prevents use of the contract by non-EVM actors, as BLS and SECPK actors MUST use the ID address format!
+
+---
 
 Instead, contracts should *normalize address input wherever possible.* 
 
@@ -115,7 +115,7 @@ contract SmolERC20 {
 }
 ```
 
-In this version, if tokens are transferred to an ID address, the `normalize` method first checks to see if there is a corresponding Eth address. If there is, we use that instead. Otherwise, the method behaves the same way.
+In this version, if tokens are transferred to an ID address, the `normalize` method first checks to see if there is a corresponding Eth address. If there is, we use that instead. Otherwise, the address is returned unchanged.
 
 #### Two-step Role Transferrance
 
@@ -144,7 +144,9 @@ The primary property address normalization wants to enforce is that every addres
 
 We can answer the same question without all the complexity, by making role transfers a two-step process. A role transfer first designates a "pending" user to receive the role. The transfer is only completed after the "pending" user calls the corresponding "accept" method. 
 
-Address format isn't checked anywhere, but by ensuring the pending user can call the "accept" function, we know the address is in its "`msg.sender` format." Also, the huge decrease in complexity should allow the contract to be more compatible with future account/address types!
+Address format isn't checked anywhere, but by ensuring the pending user can call the "accept" function, we know the address is in its "`msg.sender` format." Also, the huge decrease in complexity means this method should remain compatible with any future Filecoin network upgrade!
+
+This library provides [`OwnedClaimable.sol`](./contracts/access/OwnedClaimable.sol) as a mixin to help implement two-step role transfers.
 
 #### No hardcoded gas values
 
