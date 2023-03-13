@@ -27,6 +27,8 @@ library FilAddress {
     // bytes22 constant F4_ADDR_EXAMPLE = 0x040Aff00000000000000000000000000000000000001;  
 
     // Min/Max ID address values - useful for bitwise operations
+    address constant MAX_ID_MASK = 0x000000000000000000000000fFFFFFffFFFFfffF;
+    address constant MAX_ADDRESS_MASK = 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF;
     address constant ZERO_ID_ADDRESS = 0xfF00000000000000000000000000000000000000;
     address constant MAX_ID_ADDRESS = 0xFf0000000000000000000000FFfFFFFfFfFffFfF;
 
@@ -92,7 +94,7 @@ library FilAddress {
         /// @solidity memory-safe-assembly
         assembly {
             // Get the last 8 bytes of _a - this is the id
-            let temp := and(_a, MAX_ID_ADDRESS)
+            let temp := and(_a, MAX_ID_MASK)
 
             // Zero out the last 8 bytes of _a and compare to the zero id address
             let a_mask := and(_a, not(temp))
@@ -162,7 +164,7 @@ library FilAddress {
             success := staticcall(gas(), LOOKUP_DELEGATED_ADDRESS, 0, 0x20, 0x20, 22)
             let result := mload(0x20)
             // Result is left-aligned - shift right and remove prefix bytes
-            eth := and(MAX_ID_ADDRESS, shr(80, result))
+            eth := and(MAX_ADDRESS_MASK, shr(80, result))
 
             // Sanity-check f4 prefix - should be 0x040A
             // If it's not, we didn't get an Eth address!
