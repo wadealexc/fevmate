@@ -5,6 +5,7 @@ import "../../utils/FilAddress.sol";
 import "./IERC721TokenReceiver.sol";
 
 /**
+ * @author fevmate
  * @notice ERC721 mixin for the FEVM. This contract implements the ERC721
  * standard, with additional safety features for the FEVM.
  *
@@ -13,7 +14,7 @@ import "./IERC721TokenReceiver.sol";
  * these addresses to standard Eth addresses. 
  * 
  * This is an important consideration when developing on the FEVM, and
- * you can read about it more in [TODO].
+ * you can read about it more in the README.
  */
 abstract contract ERC721 {
     

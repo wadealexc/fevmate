@@ -4,6 +4,7 @@ pragma solidity ^0.8.17;
 import "../utils/FilAddress.sol";
 
 /**
+ * @author fevmate
  * @notice ERC20 mixin for the FEVM. This contract implements the ERC20
  * standard, with additional safety features for the FEVM.
  *
@@ -12,7 +13,7 @@ import "../utils/FilAddress.sol";
  * these addresses to standard Eth addresses. 
  * 
  * This is an important consideration when developing on the FEVM, and
- * you can read about it more in [TODO].
+ * you can read about it more in the README.
  */
 abstract contract ERC20 {
 

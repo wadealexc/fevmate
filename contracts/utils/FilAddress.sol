@@ -1,6 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
+/**
+ * @author fevmate
+ * @notice Utility functions for converting between id and
+ * eth addresses. Helps implement address normalization.
+ *
+ * See README for more details about how to use this when
+ * developing for the FEVM.
+ */
 library FilAddress {
 
     // Builtin Actor addresses
