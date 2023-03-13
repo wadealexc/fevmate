@@ -1,6 +1,6 @@
 {
   "name": "fevmate",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Building blocks for smart contract development on the Filecoin EVM",
   "files": [
     "contracts/**/*.sol"
