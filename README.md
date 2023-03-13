@@ -30,11 +30,22 @@ Standard token contracts, implemented using address normalization for token tran
 
 `npm i fevmate`
 
+... then import within your Solidity files! For example:
+
+```solidity
+import "fevmate/contracts/utils/FilAddress.sol";
+
+contract YourContract {
+
+    using FilAddress for *;
+}
+```
+
 ### Tests
 
 The FEVM doesn't have a good option for running tests locally against the FEVM. Since the whole point of fevmate is to handle FEVM-specific behavior, it really needs to be fully tested on the FEVM, rather than partially tested with an existing EVM framework.
 
-This is going to remain a big TODO until a suitable test framework exists, but I've started writing basic tests in a forked version of the `ref-fvm` repo. You can find those tests here: [`wadealexc/ref-fvm/solidity-tests](https://github.com/wadealexc/ref-fvm/tree/387de6febe6d2784c8f4ba538088cda5d8e3ff63/tools/solidity-tests).
+This is going to remain a big TODO until a suitable test framework exists, but I've started writing basic tests in a forked version of the `ref-fvm` repo. You can find those tests here: [`wadealexc/ref-fvm/solidity-tests`](https://github.com/wadealexc/ref-fvm/tree/387de6febe6d2784c8f4ba538088cda5d8e3ff63/tools/solidity-tests).
 
 These are far from perfect, but at least allow me to test basic behavior. Actually, it seems there were some issues in FilAddress - hence the 1.0.2 release!
 
