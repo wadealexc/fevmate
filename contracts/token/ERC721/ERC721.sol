@@ -100,7 +100,7 @@ abstract contract ERC721 {
         // transferFrom will normalize input
         transferFrom(_owner, _to, _tokenId);
 
-        _checkSafeReceiver(_to, msg.sender, _owner, tokenId, "");
+        _checkSafeReceiver(_to, msg.sender, _owner, _tokenId, "");
     }
 
     function safeTransferFrom(address _owner, address _to, uint _tokenId, bytes calldata _data) public virtual {
@@ -211,7 +211,7 @@ abstract contract ERC721 {
         _checkSafeReceiver(_to, msg.sender, address(0), _tokenId, _data);
     }
 
-    function _checkSafeReceiver(address _to, address _operator, address _from, uint tokenId, bytes memory _data) internal {
+    function _checkSafeReceiver(address _to, address _operator, address _from, uint _tokenId, bytes memory _data) internal {
         // Native actors (like the miner) will have a codesize of 1
         // However, they'd still need to return the magic value for
         // this to succeed.

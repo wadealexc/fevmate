@@ -2,8 +2,8 @@
 pragma solidity ^0.8.17;
 
 import {
-    DelegatedAddrNotFound,
-    InsufficientBalance,
+    UnsafeReceiver,
+    InsufficientFunds,
     DelegatedAddrNotFound
 } from "./Errors.sol";
 
@@ -246,7 +246,7 @@ library FilAddress {
      * If _recpient is some other Filecoin-native actor, this will revert.
      */
     function sendValue(address payable _recipient, uint _amount) internal {
-        if (address(this).balance < _amount) revert InsufficientBalance();
+        if (address(this).balance < _amount) revert InsufficientFunds();
 
         (bool success, ) = _recipient.call{value: _amount}("");
         if (!success) revert UnsafeReceiver();

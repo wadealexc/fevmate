@@ -26,10 +26,10 @@ library CallNative {
      * method below.
      */
     function callActor(
-        uint64 _id, 
-        uint64 _method, 
-        uint _value, 
-        uint64 _codec, 
+        uint64 _id,
+        uint64 _method,
+        uint _value,
+        uint64 _codec,
         bytes memory _data
     ) internal returns (bool, bytes memory) {
         return callHelper(false, _id, _method, _value, _codec, _data);
@@ -64,10 +64,10 @@ library CallNative {
 
     function callHelper(
         bool _readonly,
-        uint64 _id, 
-        uint64 _method, 
-        uint _value, 
-        uint64 _codec, 
+        uint64 _id,
+        uint64 _method,
+        uint _value,
+        uint64 _codec,
         bytes memory _data
     ) private returns (bool, bytes memory) {
         uint64 flags = _readonly ? READONLY_FLAG : DEFAULT_FLAG;
