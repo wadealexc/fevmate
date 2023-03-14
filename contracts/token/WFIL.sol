@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "./ERC20.sol";
-import "../utils/FilAddress.sol";
-import "../access/OwnedClaimable.sol";
+import {ERC20} from "./ERC20.sol";
+import {FilAddress} from "../utils/FilAddress.sol";
+import {OwnedClaimable} from "../access/OwnedClaimable.sol";
 
 /**
  * @author fevmate (https://github.com/wadealexc/fevmate)

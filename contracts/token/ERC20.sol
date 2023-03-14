@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "../utils/FilAddress.sol";
+import {FilAddress} from "../utils/FilAddress.sol";
 
 /**
  * @author fevmate (https://github.com/wadealexc/fevmate)
