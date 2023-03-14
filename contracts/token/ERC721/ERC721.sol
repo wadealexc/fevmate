@@ -4,6 +4,8 @@ pragma solidity ^0.8.17;
 import "../../utils/FilAddress.sol";
 import "./IERC721TokenReceiver.sol";
 
+import {Unauthorized, UnsafeReceiver} from "../../utils/Errors.sol";
+
 /**
  * @author fevmate (https://github.com/wadealexc/fevmate)
  * @notice ERC721 mixin for the FEVM. This contract implements the ERC721
@@ -11,13 +13,13 @@ import "./IERC721TokenReceiver.sol";
  *
  * All methods attempt to normalize address input. This means that if
  * they are provided ID addresses as input, they will attempt to convert
- * these addresses to standard Eth addresses. 
- * 
+ * these addresses to standard Eth addresses.
+ *
  * This is an important consideration when developing on the FEVM, and
  * you can read about it more in the README.
  */
 abstract contract ERC721 {
-    
+
     using FilAddress for *;
 
     /*//////////////////////////////////////
@@ -26,7 +28,7 @@ abstract contract ERC721 {
 
     string public name;
     string public symbol;
-    
+
     /*//////////////////////////////////////
                 ERC-721 STORAGE
     //////////////////////////////////////*/
@@ -70,12 +72,18 @@ abstract contract ERC721 {
         _owner = _owner.normalize();
         _to = _to.normalize();
 
-        require(_owner == ownerOf(_tokenId), "incorrect owner");
-        require(_to != address(0), "invalid recipient");
-        require(
-            msg.sender == _owner || isApprovedForAll(_owner, msg.sender) || msg.sender == getApproved(_tokenId), 
-            "not authorized"
-        );
+        if (
+            // Ensure the owner to `transferFrom` is the owner of `_tokenId`
+            _owner != ownerOf(_tokenId) ||
+            // Ensure the sender is the owner or is approved to transfer it
+            (
+                msg.sender != _owner &&
+                !isApprovedForAll(_owner, msg.sender) &&
+                msg.sender != getApproved(_tokenId)
+            )
+        ) revert Unauthorized();
+
+        if (_to == address(0)) revert UnsafeReceiver();
 
         unchecked {
             ownerBalances[_owner]--;
@@ -92,30 +100,14 @@ abstract contract ERC721 {
         // transferFrom will normalize input
         transferFrom(_owner, _to, _tokenId);
 
-        // Native actors (like the miner) will have a codesize of 1
-        // However, they'd still need to return the magic value for
-        // this to succeed.
-        require(
-            _to.code.length == 0 ||
-                IERC721TokenReceiver(_to).onERC721Received(msg.sender, _owner, _tokenId, "") ==
-                IERC721TokenReceiver.onERC721Received.selector,
-            "unsafe recipient"
-        );
+        _checkSafeReceiver(_to, msg.sender, _owner, tokenId, "");
     }
 
     function safeTransferFrom(address _owner, address _to, uint _tokenId, bytes calldata _data) public virtual {
         // transferFrom will normalize input
         transferFrom(_owner, _to, _tokenId);
 
-        // Native actors (like the miner) will have a codesize of 1
-        // However, they'd still need to return the magic value for
-        // this to succeed.
-        require(
-            _to.code.length == 0 ||
-                IERC721TokenReceiver(_to).onERC721Received(msg.sender, _owner, _tokenId, _data) ==
-                IERC721TokenReceiver.onERC721Received.selector,
-            "unsafe recipient"
-        );
+        _checkSafeReceiver(_to, msg.sender, _owner, _tokenId, _data);
     }
 
     function approve(address _spender, uint _tokenId) public virtual {
@@ -125,7 +117,7 @@ abstract contract ERC721 {
         // No need to normalize, since we're reading from storage
         // and we only store normalized addresses
         address owner = ownerOf(_tokenId);
-        require(msg.sender == owner || isApprovedForAll(owner, msg.sender), "not authorized");
+        if (msg.sender != owner && !isApprovedForAll(owner, msg.sender)) revert Unauthorized();
 
         tokenApprovals[_tokenId] = _spender;
         emit Approval(owner, _spender, _tokenId);
@@ -149,8 +141,9 @@ abstract contract ERC721 {
     function balanceOf(address _owner) public virtual view returns (uint) {
         // Attempt to convert owner to Eth address
         _owner = _owner.normalize();
-        
-        require(_owner != address(0), "zero address");
+
+        if (_owner == address(0)) revert UnsafeReceiver();
+
         return ownerBalances[_owner];
     }
 
@@ -187,8 +180,8 @@ abstract contract ERC721 {
         // Attempt to normalize destination
         _to = _to.normalize();
 
-        require(_to != address(0), "invalid recipient");
-        require(tokenOwners[_tokenId] == address(0), "already minted");
+        if (_to == address(0)) revert UnsafeReceiver();
+        if (tokenOwners[_tokenId] != address(0)) revert Unauthorized();
 
         ownerBalances[_to]++;
         tokenOwners[_tokenId] = _to;
@@ -209,28 +202,23 @@ abstract contract ERC721 {
     function _safeMint(address _to, uint _tokenId) internal virtual {
         _mint(_to, _tokenId);
 
-        // Native actors (like the miner) will have a codesize of 1
-        // However, they'd still need to return the magic value for
-        // this to succeed.
-        require(
-            _to.code.length == 0 ||
-                IERC721TokenReceiver(_to).onERC721Received(msg.sender, address(0), _tokenId, "") ==
-                IERC721TokenReceiver.onERC721Received.selector,
-            "unsafe recipient"
-        );
+        _checkSafeReceiver(_to, msg.sender, address(0), _tokenId, "");
     }
 
     function _safeMint(address _to, uint _tokenId, bytes memory _data) internal virtual {
         _mint(_to, _tokenId);
 
+        _checkSafeReceiver(_to, msg.sender, address(0), _tokenId, _data);
+    }
+
+    function _checkSafeReceiver(address _to, address _operator, address _from, uint tokenId, bytes memory _data) internal {
         // Native actors (like the miner) will have a codesize of 1
         // However, they'd still need to return the magic value for
         // this to succeed.
-        require(
-            _to.code.length == 0 ||
-                IERC721TokenReceiver(_to).onERC721Received(msg.sender, address(0), _tokenId, _data) ==
-                IERC721TokenReceiver.onERC721Received.selector,
-            "unsafe recipient"
-        );
+        if (
+            _to.code.length != 0 &&
+                IERC721TokenReceiver(_to).onERC721Received(_operator, _from, _tokenId, _data) !=
+                    IERC721TokenReceiver.onERC721Received.selector
+        ) revert UnsafeReceiver();
     }
 }

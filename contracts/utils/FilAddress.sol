@@ -1,6 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
+import {
+    DelegatedAddrNotFound,
+    InsufficientBalance,
+    DelegatedAddrNotFound
+} from "./Errors.sol";
+
 /**
  * @author fevmate (https://github.com/wadealexc/fevmate)
  * @notice Utility functions for converting between id and
@@ -32,7 +38,7 @@ library FilAddress {
     address constant CALL_ACTOR_BY_ID = 0xfe00000000000000000000000000000000000005;
 
     // bytes20 constant NULL = 0x0000000000000000000000000000000000000000;
-    // bytes22 constant F4_ADDR_EXAMPLE = 0x040Aff00000000000000000000000000000000000001;  
+    // bytes22 constant F4_ADDR_EXAMPLE = 0x040Aff00000000000000000000000000000000000001;
 
     // Min/Max ID address values - useful for bitwise operations
     address constant MAX_ID_MASK = 0x000000000000000000000000fFFFFFffFFFFfffF;
@@ -46,7 +52,7 @@ library FilAddress {
      * Attempt to convert address _a from an ID address to an Eth address
      * If _a is NOT an ID address, this returns _a
      * If _a does NOT have a corresponding Eth address, this returns _a
-     * 
+     *
      * NOTE: It is possible this returns an ID address! If you want a method
      *       that will NEVER return an ID address, see mustNormalize below.
      */
@@ -88,7 +94,8 @@ library FilAddress {
         // We have an ID address -- attempt the conversion
         // If there is no corresponding Eth address, revert
         (bool success, address eth) = getEthAddress(id);
-        require(success, "No corresponding Eth address");
+        if (!success) revert DelegatedAddrNotFound();
+
         return eth;
     }
 
@@ -129,7 +136,7 @@ library FilAddress {
 
     /**
      * @notice Given an Actor ID, converts it to a 20-byte ID address
-     * 
+     *
      * Note that this method does NOT check if the _id has a corresponding
      * Eth address. If you want that, try toAddress above.
      */
@@ -141,9 +148,9 @@ library FilAddress {
     /**
      * @notice Query the lookup_delegated_address precompile to convert an actor id
      * to an Eth address.
-     * 
+     *
      * --- About ---
-     * 
+     *
      * The lookup_delegated_address precompile retrieves the actor state corresponding
      * to the id. If the actor has a delegated address, it is returned using fil
      * address encoding (see below).
@@ -156,7 +163,7 @@ library FilAddress {
      * - Prefix:     "f4" address      - 1 byte   - (0x04)
      * - Namespace:  EAM actor id      - 1 byte   - (0x0A)
      * - Subaddress: EVM-style address - 20 bytes - (EVM address)
-     * 
+     *
      * This method checks that the precompile output exactly matches this format. If
      * we get anything else, we return (false, 0x00).
      */
@@ -189,10 +196,10 @@ library FilAddress {
 
     /**
      * @notice Eth address -> actor id
-     * 
+     *
      * Given an Eth address, queries the RESOLVE_ADDRESS precompile to look
      * up the corresponding actor id.
-     * 
+     *
      * If there is no ID address, this returns (false, 0)
      * If the passed-in address is already an ID address, returns (true, id)
      */
@@ -239,10 +246,10 @@ library FilAddress {
      * If _recpient is some other Filecoin-native actor, this will revert.
      */
     function sendValue(address payable _recipient, uint _amount) internal {
-        require(address(this).balance >= _amount, "Address: insufficient balance");
+        if (address(this).balance < _amount) revert InsufficientBalance();
 
         (bool success, ) = _recipient.call{value: _amount}("");
-        require(success, "Address: unable to send value, recipient may have reverted");
+        if (!success) revert UnsafeReceiver();
     }
 
     function returnDataSize() private pure returns (uint size) {
