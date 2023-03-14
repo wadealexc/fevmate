@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
+import "./CallNative.sol";
+
 /**
  * @author fevmate
  * @notice Utility functions for converting between id and
@@ -243,6 +245,32 @@ library FilAddress {
 
         (bool success, ) = _recipient.call{value: _amount}("");
         require(success, "Address: unable to send value, recipient may have reverted");
+    }
+
+    /**
+     * @notice Sends _amount to _recipient without executing _recipient's code
+     * This is done via the FEVM call_actor precompile, using FVM-side method 0,
+     * aka METHOD_SEND.
+     *
+     * METHOD_SEND transfers value without invoking the target, so this is useful
+     * if zero-execution transfers are a priority, or if you need to support a
+     * non-EVM actor - as sendValue above will not work for some non-EVM actors.
+     */
+    function sendNoExec(address payable _recipient, uint _amount) internal {
+        require(address(this).balance >= _amount, "Address: insufficient balance");
+
+        (bool success, uint64 actorID) = getActorID(_recipient);
+        require(success, "Address: unable to resolve actor ID");
+
+        // force-send _amount to _recipient without executing code
+        (success, ) = CallNative.callActor(
+            actorID, 
+            0,         // METHOD_SEND
+            _amount,
+            0,         // codec
+            ""         // empty data
+        );
+        require(success, "Address: unable to send value via METHOD_SEND");
     }
 
     function returnDataSize() private pure returns (uint size) {
