@@ -11,7 +11,7 @@ pragma solidity ^0.8.17;
  */
 library FilAddress {
 
-    // Builtin Actor addresses
+    // Builtin Actor addresses (singletons)
     address constant SYSTEM_ACTOR = 0xfF00000000000000000000000000000000000000;
     address constant INIT_ACTOR = 0xff00000000000000000000000000000000000001;
     address constant REWARD_ACTOR = 0xff00000000000000000000000000000000000002;
@@ -21,27 +21,20 @@ library FilAddress {
     address constant VERIFIED_REGISTRY_ACTOR = 0xFF00000000000000000000000000000000000006;
     address constant DATACAP_TOKEN_ACTOR = 0xfF00000000000000000000000000000000000007;
     address constant EAM_ACTOR = 0xfF0000000000000000000000000000000000000a;
-    // address constant CHAOS_ACTOR = 0xFF00000000000000000000000000000000000000; // 98
-    // address constant BURNT_FUNDS_ACTOR = 0xFF00000000000000000000000000000000000000; // 99
 
-    // Precompile addresses
+    // FEVM precompile addresses
     address constant RESOLVE_ADDRESS = 0xFE00000000000000000000000000000000000001;
     address constant LOOKUP_DELEGATED_ADDRESS = 0xfE00000000000000000000000000000000000002;
     address constant CALL_ACTOR = 0xfe00000000000000000000000000000000000003;
     // address constant GET_ACTOR_TYPE = 0xFe00000000000000000000000000000000000004; // (deprecated)
     address constant CALL_ACTOR_BY_ID = 0xfe00000000000000000000000000000000000005;
 
-    // bytes20 constant NULL = 0x0000000000000000000000000000000000000000;
-    // bytes22 constant F4_ADDR_EXAMPLE = 0x040Aff00000000000000000000000000000000000001;  
-
-    // Min/Max ID address values - useful for bitwise operations
-    address constant MAX_ID_MASK = 0x000000000000000000000000fFFFFFffFFFFfffF;
-    address constant MAX_ADDRESS_MASK = 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF;
-    address constant ZERO_ID_ADDRESS = 0xfF00000000000000000000000000000000000000;
-    address constant MAX_ID_ADDRESS = 0xFf0000000000000000000000FFfFFFFfFfFffFfF;
-
+    // An ID address with id == 0. It's also equivalent to the system actor address
+    // This is useful for bitwise operations
+    address constant ZERO_ID_ADDRESS = SYSTEM_ACTOR;
+    
     /**
-     * @notice Convert ID to Eth address
+     * @notice Convert ID to Eth address. Returns input if conversion fails.
      *
      * Attempt to convert address _a from an ID address to an Eth address
      * If _a is NOT an ID address, this returns _a
@@ -68,7 +61,7 @@ library FilAddress {
     }
 
     /**
-     * @notice Convert ID to Eth address
+     * @notice Convert ID to Eth address. Reverts if conversion fails.
      *
      * Attempt to convert address _a from an ID address to an Eth address
      * If _a is NOT an ID address, this returns _a unchanged
@@ -92,29 +85,36 @@ library FilAddress {
         return eth;
     }
 
+    // Used to clear the last 8 bytes of an address    (addr & U64_MASK)
+    address constant U64_MASK = 0xFffFfFffffFfFFffffFFFffF0000000000000000;
+    // Used to retrieve the last 8 bytes of an address (addr & MAX_U64)
+    address constant MAX_U64 = 0x000000000000000000000000fFFFFFffFFFFfffF;
+
     /**
-     * @notice Checks whether _a matches the ID address format:
-     * [0xFF] [bytes11(0)] [uint64(id)]
-     *
-     * If _a matches, returns true and the id
+     * @notice Checks whether _a matches the ID address format.
+     * If it does, returns true and the id
+     * 
+     * The ID address format is:
+     * 0xFF | bytes11(0) | uint64(id)
      */
     function isIDAddress(address _a) internal pure returns (bool isID, uint64 id) {
         /// @solidity memory-safe-assembly
         assembly {
-            // Get the last 8 bytes of _a - this is the id
-            let temp := and(_a, MAX_ID_MASK)
+            // Zeroes out the last 8 bytes of _a
+            let a_mask := and(_a, U64_MASK)
 
-            // Zero out the last 8 bytes of _a and compare to the zero id address
-            let a_mask := and(_a, not(temp))
+            // If the result is equal to the ZERO_ID_ADDRESS,
+            // _a is an ID address.
             if eq(a_mask, ZERO_ID_ADDRESS) {
                 isID := true
-                id := temp
+                id := and(_a, MAX_U64)
             }
         }
     }
 
     /**
      * @notice Given an Actor ID, converts it to an EVM-compatible address.
+     * 
      * If _id has a corresponding Eth address, we return that
      * Otherwise, _id is returned as a 20-byte ID address
      */
@@ -138,9 +138,15 @@ library FilAddress {
         assembly { addr := or(ZERO_ID_ADDRESS, _id) }
     }
 
+    // An address with all bits set. Used to clean higher-order bits
+    address constant ADDRESS_MASK = 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF;
+
     /**
-     * @notice Query the lookup_delegated_address precompile to convert an actor id
-     * to an Eth address.
+     * @notice Convert ID to Eth address by querying the lookup_delegated_address
+     * precompile.
+     *
+     * If the actor ID corresponds to an Eth address, this will return (true, addr)
+     * If the actor ID does NOT correspond to an Eth address, this will return (false, 0)
      * 
      * --- About ---
      * 
@@ -154,50 +160,87 @@ library FilAddress {
      *
      * Consequently, the only addresses lookup_delegated_address should return have:
      * - Prefix:     "f4" address      - 1 byte   - (0x04)
-     * - Namespace:  EAM actor id      - 1 byte   - (0x0A)
+     * - Namespace:  EAM actor id 10   - 1 byte   - (0x0A)
      * - Subaddress: EVM-style address - 20 bytes - (EVM address)
      * 
-     * This method checks that the precompile output exactly matches this format. If
-     * we get anything else, we return (false, 0x00).
+     * This method checks that the precompile output exactly matches this format:
+     * 22 bytes, starting with 0x040A.
+     * 
+     * If we get anything else, we return (false, 0x00).
      */
     function getEthAddress(uint64 _id) internal view returns (bool success, address eth) {
         /// @solidity memory-safe-assembly
         assembly {
-            mstore(0, _id)
-            // LOOKUP_DELEGATED_ADDRESS returns an f4-encoded address. For
-            // Eth addresses, the format is a 20-byte address, prefixed with
-            // 0x040A.
+            // Call LOOKUP_DELEGATED_ADDRESS precompile
             //
-            // So, we're expecting 22 bytes of returndata
-            success := staticcall(gas(), LOOKUP_DELEGATED_ADDRESS, 0, 0x20, 0x20, 22)
-            let result := mload(0x20)
-            // Result is left-aligned - shift right and remove prefix bytes
-            eth := and(MAX_ADDRESS_MASK, shr(80, result))
+            // Input: uint64 id, in standard EVM format (left-padded to 32 bytes)
+            //
+            // Output: LOOKUP_DELEGATED_ADDRESS returns an f4-encoded address. 
+            // For Eth addresses, the format is a 20-byte address, prefixed with
+            // 0x040A. So, we expect exactly 22 bytes of returndata.
+            // 
+            // Since we want to read an address from the returndata, we place the
+            // output at memory offset 10, which means the address is already
+            // word-aligned (10 + 22 == 32)
+            //
+            // NOTE: success and returndatasize checked at the end of the function
+            mstore(0, _id)
+            success := staticcall(gas(), LOOKUP_DELEGATED_ADDRESS, 0, 32, 10, 22)
 
-            // Sanity-check f4 prefix - should be 0x040A
-            // If it's not, we didn't get an Eth address!
-            let prefix := shr(240, result)
+            // Read result. LOOKUP_DELEGATED_ADDRESS returns raw, unpadded
+            // bytes. Assuming we succeeded, we can extract the eth address
+            // by reading from offset 0 and cleaning any higher-order bits:
+            let result := mload(0)
+            eth := and(ADDRESS_MASK, result)
+
+            // Check that the returned address has the expected prefix. The
+            // prefix is the first 2 bytes of returndata, located at memory 
+            // offset 10. 
+            // 
+            // To isolate it, shift right by the # of bits in an address (160),
+            // and clean all but the last 2 bytes.
+            let prefix := and(0xFFFF, shr(160, result))
             if iszero(eq(prefix, 0x040A)) {
                 success := false
                 eth := 0
             }
         }
+        // Checking these here because internal functions don't have
+        // a good way to return from inline assembly.
+        //
+        // But, it's very important we do check these. If the output
+        // wasn't exactly what we expected, we assume there's no eth
+        // address and return (false, 0).
         if (!success || returnDataSize() != 22) {
             return (false, address(0));
         }
     }
 
     /**
-     * @notice Eth address -> actor id
+     * @notice Convert ID to Eth address by querying the resolve_address precompile.
+     *
+     * If the passed-in address is already in ID form, returns (true, id)
+     * If the Eth address has no corresponding ID address, returns (false, 0)
+     * Otherwise, the lookup succeeds and this returns (true, id)
      * 
-     * Given an Eth address, queries the RESOLVE_ADDRESS precompile to look
-     * up the corresponding actor id.
+     * --- About ---
+     *
+     * The resolve_address precompile can resolve any fil-encoded address to its
+     * corresponding actor ID, if there is one. This means resolve_address handles
+     * all address protocols: f0, f1, f2, f3, and f4. 
      * 
-     * If there is no ID address, this returns (false, 0)
-     * If the passed-in address is already an ID address, returns (true, id)
+     * An address might not have an actor ID if it does not exist in state yet. A 
+     * typical example of this is a public-key-type address, which can exist even 
+     * if it hasn't been used on-chain yet.
+     *
+     * This method is only meant to look up ids for Eth addresses, so it contains
+     * very specific logic to correctly encode an Eth address into its f4 format.
+     * 
+     * Note: This is essentially just the reverse of getEthAddress above, so check
+     * the comments there for more details on f4 encoding.
      */
     function getActorID(address _eth) internal view returns (bool success, uint64 id) {
-        // First, check if we already have an ID address
+        // First - if we already have an ID address, we can just return that
         (success, id) = isIDAddress(_eth);
         if (success) {
             return (success, id);
@@ -205,19 +248,39 @@ library FilAddress {
 
         /// @solidity memory-safe-assembly
         assembly {
-            // Convert EVM address to f4-encoded format.
-            // This means 22 bytes, with prefix 0x040A:
-            // * 0x04 is the protocol - "f4" address
-            // * 0x0A is the namespace - "10" for the EAM actor
-            _eth := or(
+            // Convert Eth address to f4 format: 22 bytes, with prefix 0x040A.
+            // (see getEthAddress above for more details on this format)
+            //
+            // We're going to pass the 22 bytes to the precompile without any
+            // padding or length, so everything will be left-aligned. Since 
+            // addresses are right-aligned, we need to shift everything left:
+            // - 0x040A prefix - shifted left 240 bits (30 bytes * 8 bits)
+            // - Eth address   - shifted left 80 bits  (10 bytes * 8 bits)
+            let input := or(
                 shl(240, 0x040A),
                 shl(80, _eth)
             )
-            mstore(0, _eth)
-            // Call RESOLVE_ADDRESS. If successful, the result will be our id
-            success := staticcall(gas(), RESOLVE_ADDRESS, 0, 22, 0, 0x20)
-            id := mload(0)
+            // Call RESOLVE_ADDRESS precompile
+            //
+            // Input: Eth address in f4 format. 22 bytes, no padding or length
+            //
+            // Output: RESOLVE_ADDRESS returns a uint64 actor ID in standard EVM
+            // format (left-padded to 32 bytes).
+            // 
+            // NOTE: success and returndatasize checked at the end of the function
+            mstore(0, input)
+            success := staticcall(gas(), RESOLVE_ADDRESS, 0, 22, 0, 32)
+
+            // Read result and clean higher-order bits, just in case.
+            // If successful, this will be the actor id.
+            id := and(MAX_U64, mload(0))
         }
+        // Checking these here because internal functions don't have
+        // a good way to return from inline assembly.
+        //
+        // But, it's very important we do check these. If the output
+        // wasn't exactly what we expected, we assume there's no ID
+        // address and return (false, 0).
         if (!success || returnDataSize() != 32) {
             return (false, 0);
         }
