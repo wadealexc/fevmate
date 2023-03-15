@@ -4,7 +4,7 @@ pragma solidity ^0.8.17;
 import "../utils/FilAddress.sol";
 
 /**
- * @author fevmate
+ * @author fevmate (https://github.com/wadealexc/fevmate)
  * @notice ERC20 mixin for the FEVM. This contract implements the ERC20
  * standard, with additional safety features for the FEVM.
  *

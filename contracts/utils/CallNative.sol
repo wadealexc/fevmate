@@ -49,6 +49,6 @@ library CallNative {
         uint64 flags = _readonly ? READONLY_FLAG : DEFAULT_FLAG;
         require(!_readonly || _value == 0); // sanity check - shouldn't hit this in a private method
         bytes memory input = abi.encode(_method, _value, flags, _codec, _data, _id);
-        return Addresses.CALL_ACTOR_BY_ID.delegatecall(input);
+        return FilAddress.CALL_ACTOR_BY_ID.delegatecall(input);
     }
 }

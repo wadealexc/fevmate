@@ -5,7 +5,7 @@ import "../../utils/FilAddress.sol";
 import "./IERC721TokenReceiver.sol";
 
 /**
- * @author fevmate
+ * @author fevmate (https://github.com/wadealexc/fevmate)
  * @notice ERC721 mixin for the FEVM. This contract implements the ERC721
  * standard, with additional safety features for the FEVM.
  *
