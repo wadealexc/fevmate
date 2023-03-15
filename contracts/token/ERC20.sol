@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "../utils/FilAddress.sol";
+import {FilAddress} from "../utils/FilAddress.sol";
 
 /**
  * @author fevmate (https://github.com/wadealexc/fevmate)
@@ -10,8 +10,8 @@ import "../utils/FilAddress.sol";
  *
  * All methods attempt to normalize address input. This means that if
  * they are provided ID addresses as input, they will attempt to convert
- * these addresses to standard Eth addresses. 
- * 
+ * these addresses to standard Eth addresses.
+ *
  * This is an important consideration when developing on the FEVM, and
  * you can read about it more in the README.
  */
@@ -48,8 +48,8 @@ abstract contract ERC20 {
     //////////////////////////////////////*/
 
     constructor (
-        string memory _name, 
-        string memory _symbol, 
+        string memory _name,
+        string memory _symbol,
         uint8 _decimals
     ) {
         name = _name;
@@ -64,14 +64,14 @@ abstract contract ERC20 {
     function transfer(address _to, uint _amount) public virtual returns (bool) {
         // Attempt to convert destination to Eth address
         _to = _to.normalize();
-        
+
         balances[msg.sender] -= _amount;
         balances[_to] += _amount;
 
         emit Transfer(msg.sender, _to, _amount);
         return true;
     }
-    
+
     function transferFrom(address _owner, address _to, uint _amount) public virtual returns (bool) {
         // Attempt to convert owner and destination to Eth addresses
         _owner = _owner.normalize();
@@ -82,7 +82,7 @@ abstract contract ERC20 {
         uint allowed = allowances[_owner][msg.sender];
         if (allowed != type(uint).max)
             allowances[_owner][msg.sender] = allowed - _amount;
-        
+
         balances[_owner] -= _amount;
         balances[_to] += _amount;
 

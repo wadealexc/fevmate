@@ -1,11 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import {
-    UnsafeReceiver,
-    InsufficientFunds,
-    DelegatedAddrNotFound
-} from "./Errors.sol";
+error UnsafeReceiver();
+error InsufficientFunds();
+error DelegatedAddrNotFound();
 
 /**
  * @author fevmate (https://github.com/wadealexc/fevmate)

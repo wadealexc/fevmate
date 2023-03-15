@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "../../utils/FilAddress.sol";
-import "./IERC721TokenReceiver.sol";
+import {FilAddress} from "../../utils/FilAddress.sol";
+import {IERC721TokenReceiver} from "./IERC721TokenReceiver.sol";
 
-import {Unauthorized, UnsafeReceiver} from "../../utils/Errors.sol";
+error Unauthorized();
+error UnsafeReceiver();
 
 /**
  * @author fevmate (https://github.com/wadealexc/fevmate)
