@@ -2,7 +2,7 @@
 pragma solidity ^0.8.17;
 
 /**
- * @author fevmate
+ * @author fevmate (https://github.com/wadealexc/fevmate)
  * @notice Utility functions for converting between id and
  * eth addresses. Helps implement address normalization.
  *
@@ -41,7 +41,7 @@ library FilAddress {
     address constant MAX_ID_ADDRESS = 0xFf0000000000000000000000FFfFFFFfFfFffFfF;
 
     /**
-     * @notice ID -> Eth address
+     * @notice Convert ID to Eth address
      *
      * Attempt to convert address _a from an ID address to an Eth address
      * If _a is NOT an ID address, this returns _a
@@ -68,7 +68,7 @@ library FilAddress {
     }
 
     /**
-     * @notice ID -> Eth address
+     * @notice Convert ID to Eth address
      *
      * Attempt to convert address _a from an ID address to an Eth address
      * If _a is NOT an ID address, this returns _a unchanged

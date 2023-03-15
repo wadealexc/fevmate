@@ -3,6 +3,10 @@ pragma solidity ^0.8.0;
 
 import "./FilAddress.sol";
 
+/**
+ * @author fevmate (https://github.com/wadealexc/fevmate)
+ * @notice Helpers for calling actors by ID
+ */
 library CallNative {
 
     // keccak([])
@@ -16,6 +20,11 @@ library CallNative {
     uint64 constant DEFAULT_FLAG = 0x00000000;
     uint64 constant READONLY_FLAG = 0x00000001;
 
+    /**
+     * @notice Call actor by ID. This method allows the target actor
+     * to change state. If you don't want this, see the readonly 
+     * method below.
+     */
     function callActor(
         uint64 _id, 
         uint64 _method, 
@@ -26,6 +35,21 @@ library CallNative {
         return callHelper(false, _id, _method, _value, _codec, _data);
     }
 
+    /**
+     * @notice Call actor by ID, and revert if state changes occur.
+     * This is the call_actor_id precompile equivalent of an EVM
+     * staticcall. By passing the READONLY flag, the FVM will prevent
+     * state changes in the same way staticcall does.
+     *
+     * Note: The assembly here is because the call_actor_id precompile
+     * has to be called using delegatecall, and solc's mutability checker
+     * won't allow me to call this method "view" if it can delegatecall.
+     * 
+     * Having a "view" method is nice for usability, though, because users
+     * can "read" contract methods in frontends without sending a transaction.
+     * 
+     * ... so we trick solc into allowing the method to be marked as view.
+     */
     function callActorReadonly(
         uint64 _id,
         uint64 _method,

@@ -5,7 +5,7 @@ import "./ERC20.sol";
 import "../utils/FilAddress.sol";
 
 /**
- * @author fevmate
+ * @author fevmate (https://github.com/wadealexc/fevmate)
  * @notice Wrapped Filecoin implementation, using ERC20-FEVM mixin.
  */
 contract WFIL is ERC20("Wrapped Filecoin", "WFIL", 18) {
