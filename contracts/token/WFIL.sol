@@ -19,6 +19,12 @@ contract WFIL is ERC20("Wrapped Filecoin", "WFIL", 18), OwnedClaimable {
 
     event Deposit(address indexed from, uint amount);
     event Withdrawal(address indexed to, uint amount);
+    
+    /*//////////////////////////////////////
+                  CONSTRUCTION
+    //////////////////////////////////////*/
+    
+    constructor(address owner) OwnedClaimable(owner) {}
 
     /*//////////////////////////////////////
                   WFIL METHODS
