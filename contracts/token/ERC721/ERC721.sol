@@ -1,11 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import {FilAddress} from "../../utils/FilAddress.sol";
-import {IERC721TokenReceiver} from "./IERC721TokenReceiver.sol";
-
-error Unauthorized();
-error UnsafeReceiver();
+import "../../utils/FilAddress.sol";
+import "./IERC721TokenReceiver.sol";
 
 /**
  * @author fevmate (https://github.com/wadealexc/fevmate)
@@ -22,6 +19,9 @@ error UnsafeReceiver();
 abstract contract ERC721 {
     
     using FilAddress for *;
+    
+    error Unauthorized();
+    error UnsafeReceiver();
 
     /*//////////////////////////////////////
                   TOKEN INFO
