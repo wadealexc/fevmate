@@ -15,7 +15,10 @@ import "../utils/FilAddress.sol";
  */
 abstract contract OwnedClaimable {    
     
+    using FilAddress for *;
+
     error Unauthorized();
+    error InvalidAddress();
 
     /*//////////////////////////////////////
                   OWNER INFO
@@ -36,9 +39,9 @@ abstract contract OwnedClaimable {
     //////////////////////////////////////*/
 
     constructor(address _owner) {
-        if (_owner == address(0)) revert FilAddress.InvalidAddress();
-        // normalize `_owner` to avoid setting an EVM actor ID address as owner
-        owner = FilAddress.normalize(_owner);
+        if (_owner == address(0)) revert InvalidAddress();
+        // normalize _owner to avoid setting an EVM actor's ID address as owner
+        owner = _owner.normalize();
 
         emit OwnershipTransferred(address(0), owner);
     }

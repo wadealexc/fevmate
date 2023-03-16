@@ -24,7 +24,7 @@ contract WFIL is ERC20("Wrapped Filecoin", "WFIL", 18), OwnedClaimable {
                   CONSTRUCTION
     //////////////////////////////////////*/
     
-    constructor(address owner) OwnedClaimable(owner) {}
+    constructor(address _owner) OwnedClaimable(_owner) {}
 
     /*//////////////////////////////////////
                   WFIL METHODS
