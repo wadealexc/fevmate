@@ -22,6 +22,7 @@ abstract contract ERC721 {
     
     error Unauthorized();
     error UnsafeReceiver();
+    error NullOwner();
 
     /*//////////////////////////////////////
                   TOKEN INFO
@@ -73,10 +74,10 @@ abstract contract ERC721 {
         _owner = _owner.normalize();
         _to = _to.normalize();
 
+        // Ensure the _owner is the owner of _tokenId, and
+        // Ensure msg.sender is allowed to transfer _tokenId
         if (
-            // Ensure the owner to `transferFrom` is the owner of `_tokenId`
             _owner != ownerOf(_tokenId) ||
-            // Ensure the sender is the owner or is approved to transfer it
             (
                 msg.sender != _owner &&
                 !isApprovedForAll(_owner, msg.sender) &&
@@ -101,14 +102,20 @@ abstract contract ERC721 {
         // transferFrom will normalize input
         transferFrom(_owner, _to, _tokenId);
 
-        _checkSafeReceiver(_to, msg.sender, _owner, _tokenId, "");
+        // Check receiver. Only _owner needs to be normalized here, since:
+        // - msg.sender is already normalized by default
+        // - _to is getting called, which behaves identically for ID / Eth addresses
+        _checkSafeReceiver(_to, msg.sender, _owner.normalize(), _tokenId, "");
     }
 
     function safeTransferFrom(address _owner, address _to, uint _tokenId, bytes calldata _data) public virtual {
         // transferFrom will normalize input
         transferFrom(_owner, _to, _tokenId);
 
-        _checkSafeReceiver(_to, msg.sender, _owner, _tokenId, _data);
+        // Check receiver. Only _owner needs to be normalized here, since:
+        // - msg.sender is already normalized by default
+        // - _to is getting called, which behaves identically for ID / Eth addresses
+        _checkSafeReceiver(_to, msg.sender, _owner.normalize(), _tokenId, _data);
     }
 
     function approve(address _spender, uint _tokenId) public virtual {
@@ -143,14 +150,14 @@ abstract contract ERC721 {
         // Attempt to convert owner to Eth address
         _owner = _owner.normalize();
 
-        if (_owner == address(0)) revert UnsafeReceiver();
+        if (_owner == address(0)) revert NullOwner();
 
         return ownerBalances[_owner];
     }
 
     function ownerOf(uint _tokenId) public virtual view returns (address) {
         address owner = tokenOwners[_tokenId];
-        require(owner != address(0), "not minted yet");
+        if (owner == address(0)) revert NullOwner();
         return owner;
     }
 
@@ -203,15 +210,27 @@ abstract contract ERC721 {
     function _safeMint(address _to, uint _tokenId) internal virtual {
         _mint(_to, _tokenId);
 
+        // Check receiver. No normalization is needed:
+        // - msg.sender is already normalized by default
+        // - _to is getting called, which behaves identically for ID / Eth addresses
+        // - address(0) doesn't need normalization
         _checkSafeReceiver(_to, msg.sender, address(0), _tokenId, "");
     }
 
     function _safeMint(address _to, uint _tokenId, bytes memory _data) internal virtual {
         _mint(_to, _tokenId);
 
+        // Check receiver. No normalization is needed:
+        // - msg.sender is already normalized by default
+        // - _to is getting called, which behaves identically for ID / Eth addresses
+        // - address(0) doesn't need normalization
         _checkSafeReceiver(_to, msg.sender, address(0), _tokenId, _data);
     }
 
+    /**
+     * @notice This method does NOT normalize inputs. Ensure addresses are
+     * normalized before calling this method.
+     */
     function _checkSafeReceiver(address _to, address _operator, address _from, uint _tokenId, bytes memory _data) internal {
         // Native actors (like the miner) will have a codesize of 1
         // However, they'd still need to return the magic value for

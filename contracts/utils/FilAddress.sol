@@ -10,7 +10,9 @@ pragma solidity ^0.8.17;
  * developing for the FEVM.
  */
 library FilAddress {
+    
     // Custom errors
+    error CallFailed();
     error InvalidAddress();
     error InsufficientFunds();
 
@@ -308,7 +310,7 @@ library FilAddress {
         if (address(this).balance < _amount) revert InsufficientFunds();
 
         (bool success, ) = _recipient.call{value: _amount}("");
-        if (!success) revert InvalidAddress();
+        if (!success) revert CallFailed();
     }
 
     function returnDataSize() private pure returns (uint size) {
