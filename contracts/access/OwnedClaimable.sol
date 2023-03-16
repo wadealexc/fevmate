@@ -13,7 +13,12 @@ import "../utils/FilAddress.sol";
  * This should mean it's possible for other Filecoin actor types to hold the
  * owner role - like BLS/SECP account actors.
  */
-abstract contract OwnedClaimable {
+abstract contract OwnedClaimable {    
+    
+    using FilAddress for *;
+
+    error Unauthorized();
+    error InvalidAddress();
 
     /*//////////////////////////////////////
                   OWNER INFO
@@ -33,10 +38,12 @@ abstract contract OwnedClaimable {
                   CONSTRUCTOR
     //////////////////////////////////////*/
 
-    constructor() {
-        owner = msg.sender;
+    constructor(address _owner) {
+        if (_owner == address(0)) revert InvalidAddress();
+        // normalize _owner to avoid setting an EVM actor's ID address as owner
+        owner = _owner.normalize();
 
-        emit OwnershipTransferred(address(0), msg.sender);
+        emit OwnershipTransferred(address(0), owner);
     }
 
     /*//////////////////////////////////////
@@ -44,8 +51,7 @@ abstract contract OwnedClaimable {
     //////////////////////////////////////*/
 
     modifier onlyOwner() virtual {
-        require(msg.sender == owner, "not authorized");
-
+        if (msg.sender != owner) revert Unauthorized();
         _;
     }
 
@@ -60,7 +66,7 @@ abstract contract OwnedClaimable {
      * revoke it.
      */
     function revokeOwnership() public virtual onlyOwner {
-        require(pendingOwner == address(0), "must not have pending owner");
+        if (pendingOwner != address(0)) revert Unauthorized();
         owner = address(0);
 
         emit OwnershipTransferred(msg.sender, address(0));
@@ -88,7 +94,7 @@ abstract contract OwnedClaimable {
      * owner's msg.sender address.         
      */
     function acceptOwnership() public virtual {
-        require(msg.sender == pendingOwner, "unauthorized");
+        if (msg.sender != pendingOwner) revert Unauthorized();
 
         // Transfer ownership and set pendingOwner to 0
         address oldOwner = owner;
