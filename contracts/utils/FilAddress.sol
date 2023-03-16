@@ -10,6 +10,9 @@ pragma solidity ^0.8.17;
  * developing for the FEVM.
  */
 library FilAddress {
+    // Custom errors
+    error InvalidAddress();
+    error InsufficientFunds();
 
     // Builtin Actor addresses (singletons)
     address constant SYSTEM_ACTOR = 0xfF00000000000000000000000000000000000000;
@@ -81,7 +84,7 @@ library FilAddress {
         // We have an ID address -- attempt the conversion
         // If there is no corresponding Eth address, revert
         (bool success, address eth) = getEthAddress(id);
-        require(success, "No corresponding Eth address");
+        if (!success) revert InvalidAddress();
         return eth;
     }
 
@@ -302,10 +305,10 @@ library FilAddress {
      * If _recpient is some other Filecoin-native actor, this will revert.
      */
     function sendValue(address payable _recipient, uint _amount) internal {
-        require(address(this).balance >= _amount, "Address: insufficient balance");
+        if (address(this).balance < _amount) revert InsufficientFunds();
 
         (bool success, ) = _recipient.call{value: _amount}("");
-        require(success, "Address: unable to send value, recipient may have reverted");
+        if (!success) revert InvalidAddress();
     }
 
     function returnDataSize() private pure returns (uint size) {
