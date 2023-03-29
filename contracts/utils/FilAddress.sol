@@ -222,7 +222,7 @@ library FilAddress {
     }
 
     /**
-     * @notice Convert ID to Eth address by querying the resolve_address precompile.
+     * @notice Convert Eth address to ID by querying the resolve_address precompile.
      *
      * If the passed-in address is already in ID form, returns (true, id)
      * If the Eth address has no corresponding ID address, returns (false, 0)
