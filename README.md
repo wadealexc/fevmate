@@ -20,7 +20,7 @@ Standard token contracts, implemented using address normalization for token tran
 
 * [`ERC20.sol`](./contracts/token/ERC20.sol)
 * [`ERC721.sol`](./contracts/token/ERC721/ERC721.sol)
-* [`WFIL.sol`](./contracts/token/WFIL.sol)
+* [`WFIL.sol`](./contracts/token/WFIL.sol): The version here is the canonical WFIL deployed by GLIF to Filecoin mainnet. Contract address: [`0x60E1773636CF5E4A227d9AC24F20fEca034ee25A`](https://filfox.info/en/address/0x60E1773636CF5E4A227d9AC24F20fEca034ee25A)
 
 **Utilities**
 
